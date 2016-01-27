@@ -65,14 +65,28 @@ class RestaurantSpider(scrapy.spiders.Spider):
                 url = "http://www.dianping.com" + url_suffix
                 dic["sub_region"] = name
                 logger.info("cuisine : %s sub_cuisine : %s region : %s sub_region : %s", cuisine, sub_cuisine, region, name)
-                yield scrapy.Request(url, callback=self.parse_list, meta=dic)
+                yield scrapy.Request(url, callback=self.parse_first_page, meta=dic)
 
         if len(sub_regions) == 0:
             logger.info("cuisine : %s sub_cuisine : %s region : %s sub_region : %s", cuisine, sub_cuisine, region, "none")
-            self.parse_list(response)
+            self.parse_first_page(response)
             
     # 解析列表
-    def parse_list(self, response):
+    def parse_first_page(self, response):
+        pages = response.selector.xpath("//body[@id='top']/div[6][@class='section Fix']/div[3][@class='content-wrap']/div[1][@class='shop-wrap']/div[2][@class='page']/a[@class='PageLink']/@title").extract()
+        if len(pages) > 0:
+            pagesCount = int(pages[-1])
+            for i in range(2, pagesCount+1):
+                url = "%sp%d" % (response.url, i)
+                yield scrapy.Request(url, callback=self.parse_other_page)
+
+        shop_url_list = response.selector.xpath("//div[@class='tit']/a[1]/@href").extract()
+        for shop_url in shop_url_list:
+            url = "http://www.dianping.com" + shop_url
+            logger.info(url)
+            yield scrapy.Request(url, callback=self.parse_restaurant)
+
+    def parse_other_page(self, response):
         shop_url_list = response.selector.xpath("//div[@class='tit']/a[1]/@href").extract()
         for shop_url in shop_url_list:
             url = "http://www.dianping.com" + shop_url
