@@ -98,9 +98,6 @@ class RestaurantSpider(scrapy.spiders.Spider):
         coordinate = response.selector.xpath("//*[@id='aside']/script[1]/text()").re(r"{lng:(\d+.\d+),lat:(\d+\.\d+)}")
         name = response.selector.xpath("//div[@id='basic-info' and @class='basic-info default nug_shop_ab_pv-a']/h1[@class='shop-name']/text()").extract()[0]
         name = name.strip()
-        if (len(coordinate) == 2):
-            lng = coordinate[0]
-            lat = coordinate[1]
-            logger.info("restaurant's name is %s, coordinate is %s, %s", name, lng, lat)
-        else:
-            pass
+        lng = coordinate[0]
+        lat = coordinate[1]
+        logger.info("restaurant's name is %s, coordinate is %s, %s", name, lng, lat)
