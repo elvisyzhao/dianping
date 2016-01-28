@@ -99,9 +99,20 @@ class RestaurantSpider(scrapy.spiders.Spider):
         coordinate = response.selector.xpath("//*[@id='aside']/script[1]/text()").re(r"{lng:(\d+.\d+),lat:(\d+\.\d+)}")
         name = response.selector.xpath("//div[@id='basic-info' and @class='basic-info default nug_shop_ab_pv-a']/h1[@class='shop-name']/text()").extract()[0]
         name = name.strip()
-        lng = coordinate[0]
-        lat = coordinate[1]
-        logger.info("restaurant's name is %s, coordinate is %s, %s", name, lng, lat)
+        lng = "0"
+        lat = "0"
+        try:
+            lng = coordinate[0]
+            lat = coordinate[1]
+        except:
+            pass
         address = response.selector.xpath("//div[@id='basic-info' and @class='basic-info default nug_shop_ab_pv-a']/div[2][@class='expand-info address']/span[2][@class='item']/@title").extract()[0]
-        average = response.selector.xpath("//*[@id='basic-info']/div[1]/span[3]/text()").re(r"(\d+)")
+        average = "0"
+        try:
+            average = response.selector.xpath("//*[@id='basic-info']/div[1]/span[3]/text()").re(r"(\d+)")[0]
+        except:
+            pass
         last_update_time = datetime.datetime.now()
+        logger.info(("restaurant's name is %s, coordinates is : %f:%f, address"
+            "is %s, average_consumption is %d, fetched time is %s"), name, float(lng),
+        float(lat), address, int(average), last_update_time.strftime("%Y-%m-%d %H:%M:%S"))
