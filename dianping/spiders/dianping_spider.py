@@ -2,6 +2,7 @@
 
 import scrapy
 import logging
+import datetime
 from dianping.items import DianpingRestaurant
 from redis import Redis
 
@@ -98,6 +99,10 @@ class RestaurantSpider(scrapy.spiders.Spider):
         coordinate = response.selector.xpath("//*[@id='aside']/script[1]/text()").re(r"{lng:(\d+.\d+),lat:(\d+\.\d+)}")
         name = response.selector.xpath("//div[@id='basic-info' and @class='basic-info default nug_shop_ab_pv-a']/h1[@class='shop-name']/text()").extract()[0]
         name = name.strip()
+        address = response.selector.xpath("//div[@id='basic-info' and @class='basic-info default nug_shop_ab_pv-a']/div[2][@class='expand-info address']/span[2][@class='item']/@title").extract()[0]
+        average = response.selector.xpath("//*[@id='basic-info']/div[1]/span[3]/text()").re(r"(\d+)")
+        last_update_time = datetime.datetime.now()
+        
         if (len(coordinate) == 2):
             lng = coordinate[0]
             lat = coordinate[1]
